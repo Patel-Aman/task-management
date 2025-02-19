@@ -1,0 +1,60 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - pnpm-store:/root/.pnpm-store
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:5000
+    networks:
+      - task_management
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://admin:173314@dev-db:27017/task_management?authSource=admin
+      - PORT=5000
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - pnpm-store:/root/.pnpm-store
+    networks:
+      - task_management
+    depends_on:
+      dev-db:
+        condition: service_healthy
+
+  dev-db:
+    image: mongo:8
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 173314
+    networks:
+      - task_management
+    healthcheck:
+      test: mongosh --eval "db.adminCommand('ping')" --quiet
+      interval: 5s
+      timeout: 30s
+      retries: 3
+
+networks:
+  task_management:
+
+volumes:
+  pnpm-store:
