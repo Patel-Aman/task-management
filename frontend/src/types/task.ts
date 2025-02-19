@@ -12,6 +12,5 @@ export interface TaskState {
   selectedTask: Task | null;
   loading: boolean;
   error: string | null;
-  totalPages: number;
-  currentPage: number;
+  total: number;
 }

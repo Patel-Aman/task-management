@@ -52,8 +52,7 @@ const initialState: TaskState = {
   selectedTask: null,
   loading: false,
   error: null,
-  totalPages: 1,
-  currentPage: 1,
+  total: 0,
 };
 
 const taskSlice = createSlice({
@@ -76,8 +75,7 @@ const taskSlice = createSlice({
       .addCase(fetchTasks.fulfilled, (state, action) => {
         state.loading = false;
         state.items = action.payload.tasks;
-        state.totalPages = action.payload.totalPages;
-        state.currentPage = action.payload.currentPage;
+        state.total = action.payload.total;
       })
       .addCase(fetchTasks.rejected, (state, action) => {
         state.loading = false;
