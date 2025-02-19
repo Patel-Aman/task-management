@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto, QueryTasksDto, UpdateTaskDto } from './dto/task.dto';
-import { Task, TaskStatus } from 'src/schemas/Task.schema';
+import { Task, TaskStatus } from '../schemas/Task.schema';
 import {
   ApiOperation,
   ApiParam,

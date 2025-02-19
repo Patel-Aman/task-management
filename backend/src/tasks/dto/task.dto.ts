@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { TaskStatus } from 'src/schemas/Task.schema';
+import { TaskStatus } from '../../schemas/Task.schema';
 
 export class CreateTaskDto {
   @ApiProperty({

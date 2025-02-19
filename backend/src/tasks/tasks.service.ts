@@ -4,7 +4,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Task, TaskDocument } from 'src/schemas/Task.schema';
+import { Task, TaskDocument } from '../schemas/Task.schema';
 import { CreateTaskDto, QueryTasksDto, UpdateTaskDto } from './dto/task.dto';
 
 @Injectable()
