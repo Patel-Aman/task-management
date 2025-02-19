@@ -31,14 +31,14 @@ cd task-manager
 2. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. Create a `.env` file in the root directory:
 
 ```env
 MONGODB_URI=mongodb://localhost:27017/task-manager
-PORT=3000
+PORT=5000
 ```
 
 ## Running the Application
@@ -69,7 +69,7 @@ docker-compose down -v
 
 ## API Documentation
 
-The API documentation is available via Swagger UI at: `http://localhost:3000/api`
+The API documentation is available via Swagger UI at: `http://localhost:5000/api`
 
 ## Run tests
 
