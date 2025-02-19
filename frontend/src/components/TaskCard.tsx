@@ -13,16 +13,7 @@ import {
 import { Button } from './ui/button';
 import { Edit2, Trash2 } from 'lucide-react';
 
-interface TaskUI {
-  id: string;
-  title: string;
-  description: string;
-  status: 'pending' | 'in-progress' | 'completed';
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export const TaskCard = ({ task }: { task: TaskUI }) => {
+export const TaskCard = ({ task }: { task: Task }) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
 

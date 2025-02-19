@@ -25,7 +25,7 @@ export const fetchTaskById = createAsyncThunk(
 
 export const createTask = createAsyncThunk(
   'tasks/createTask',
-  async (task: Omit<Task, '_id' | 'createdAt' | 'updatedAt'>) => {
+  async (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     const response = await axios.post(`${API_URL}/tasks`, task);
     return response.data;
   }
@@ -98,14 +98,14 @@ const taskSlice = createSlice({
       })
       .addCase(updateTask.fulfilled, (state, action) => {
         const index = state.items.findIndex(
-          (task) => task._id === action.payload._id
+          (task) => task.id === action.payload.id
         );
         if (index !== -1) {
           state.items[index] = action.payload;
         }
       })
       .addCase(deleteTask.fulfilled, (state, action) => {
-        state.items = state.items.filter((task) => task._id !== action.payload);
+        state.items = state.items.filter((task) => task.id !== action.payload);
       });
   },
 });
