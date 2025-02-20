@@ -24,8 +24,8 @@ A robust RESTful API built with NestJS and MongoDB for managing tasks. This appl
 1. Clone the repository:
 
 ```bash
-git clone
-cd task-manager
+git clone https://github.com/Patel-Aman/task-management
+cd task-manager/backend
 ```
 
 2. Install dependencies:
@@ -52,19 +52,6 @@ npm run start:dev
 # Production mode
 npm run build
 npm run start:prod
-```
-
-### Using Docker
-
-```bash
-# Build and start containers
-docker-compose up --build
-
-# Stop containers
-docker-compose down
-
-# Stop containers and remove volumes
-docker-compose down -v
 ```
 
 ## API Documentation

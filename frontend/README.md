@@ -73,66 +73,6 @@ A modern task management application built with Next.js, Redux Toolkit, and Type
    pnpm run dev
    ```
 
-## 🐳 Docker Setup
-
-1. **Build and run with Docker Compose**
-
-   ```bash
-   docker-compose up --build
-   ```
-
-2. **Access the application**
-   - Frontend: http://localhost:3000
-   - API: http://localhost:5000
-
-## 📁 Project Structure
-
-```
-src/
-├── components/
-│   ├── layout/
-│   │   ├── Layout.tsx
-│   │   ├── Header.tsx
-│   │   └── Sidebar.tsx
-│   ├── ui/
-│   │   └── [shadcn-ui components]
-│   ├── TaskCard.tsx
-│   ├── TaskForm.tsx
-│   ├── ThemeToggle.tsx
-│   └── UserMenu.tsx
-├── pages/
-│   ├── _app.tsx
-│   ├── tasks/
-│   │   ├── index.tsx
-│   │   ├── new.tsx
-│   │   └── edit/[id].tsx
-├── store/
-│   ├── index.ts
-│   ├── hooks.ts
-│   └── slices/
-│       └── taskSlice.ts
-├── types/
-│   └── task.ts
-└── styles/
-    └── globals.css
-```
-
-## 🔄 API Endpoints
-
-```
-POST /tasks         - Create a new task
-GET /tasks          - Fetch all tasks with pagination
-GET /tasks/:id      - Fetch a single task
-PUT /tasks/:id      - Update a task
-DELETE /tasks/:id   - Delete a task
-
-Query Parameters for GET /tasks:
-- page: Page number (default: 1)
-- limit: Items per page (default: 10)
-- search: Search in title and description
-- status: Filter by status (pending/in-progress/completed)
-```
-
 ## 🧪 Running Tests
 
 ```bash
