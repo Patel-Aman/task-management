@@ -1,129 +1,205 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Model, Types } from 'mongoose';
-import { TasksService } from './tasks.service';
-import { Task, TaskDocument } from '../schemas/Task.schema';
 import { Test, TestingModule } from '@nestjs/testing';
+import { TasksService } from './tasks.service';
 import { getModelToken } from '@nestjs/mongoose';
+import { Task, TaskStatus } from '../schemas/Task.schema';
+import { Model } from 'mongoose';
+import { NotFoundException } from '@nestjs/common';
+import { QueryTasksDto, UpdateTaskDto } from './dto/task.dto';
 
-describe('TaskService Sequential Operations', () => {
-  let service: TasksService;
-  let model: Model<TaskDocument>;
-  let createdTaskId: string;
+describe('TasksService', () => {
+  let tasksService: TasksService;
+  let model: Model<Task>;
 
-  // Mock data
-  const mockTaskDto = {
-    title: 'test task',
-    description: 'this is a test task',
+  const mockTask = {
+    id: '61c0ccf11d7bf83d153d7c06',
+    title: 'Test Task',
+    description: 'Task Description',
+    status: 'pending',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
-  // We'll store the created task here to use in subsequent tests
-  let createdTask: any;
+  const mockTasksService = {
+    findById: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    findByIdAndDelete: jest.fn(),
+    exec: jest.fn(),
+    countDocuments: jest.fn(),
+    find: jest.fn(),
+    sort: jest.fn(),
+    skip: jest.fn(),
+    limit: jest.fn(),
+  };
 
-  beforeAll(async () => {
-    const mockTaskModel = jest.fn().mockImplementation((dto) => ({
-      ...dto,
-      _id: new Types.ObjectId(),
-      save: jest.fn().mockResolvedValue({
-        ...dto,
-        _id: new Types.ObjectId(),
-        updatedAt: new Date(),
-      }),
-    }));
-
+  beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TasksService,
         {
           provide: getModelToken(Task.name),
-          useValue: Object.assign(mockTaskModel, {
-            create: jest.fn().mockImplementation((dto) =>
-              Promise.resolve({
-                ...dto,
-                _id: new Types.ObjectId(),
-                updatedAt: new Date(),
-              }),
-            ),
-            find: jest.fn().mockReturnValue({
-              sort: jest.fn().mockReturnThis(),
-              skip: jest.fn().mockReturnThis(),
-              limit: jest.fn().mockReturnThis(),
-              exec: jest.fn().mockResolvedValue([]),
-            }),
-            countDocuments: jest.fn().mockResolvedValue(0),
-            findById: jest.fn().mockReturnValue({
-              exec: jest.fn().mockResolvedValue(null),
-            }),
-            findByIdAndUpdate: jest.fn().mockReturnValue({
-              exec: jest.fn().mockResolvedValue(null),
-            }),
-            findByIdAndDelete: jest.fn().mockReturnValue({
-              exec: jest.fn().mockResolvedValue(null),
-            }),
-          }),
+          useValue: mockTasksService,
         },
       ],
     }).compile();
 
-    service = module.get<TasksService>(TasksService);
-    model = module.get<Model<TaskDocument>>(getModelToken(Task.name));
+    tasksService = module.get<TasksService>(TasksService);
+    model = module.get<Model<Task>>(getModelToken(Task.name));
   });
 
-  it('1. should be defined', () => {
-    expect(service).toBeDefined();
-  });
+  describe('getAllTasks', () => {
+    it('should return tasks and total count', async () => {
+      const queryDto: QueryTasksDto = {
+        page: '1',
+        limit: '10',
+        search: 'test',
+        status: TaskStatus.PENDING,
+      };
 
-  it('2. should create a task', async () => {
-    const result = await service.createNewTask(mockTaskDto);
-    createdTaskId = result.id.toString();
+      const mockTasks = [mockTask];
+      const mockTotal = 1;
 
-    expect(result).toMatchObject({
-      title: mockTaskDto.title,
-      description: mockTaskDto.description,
+      mockTasksService.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          skip: jest.fn().mockReturnValue({
+            limit: jest.fn().mockReturnValue({
+              exec: jest.fn().mockResolvedValue(mockTasks),
+            }),
+          }),
+        }),
+      });
+
+      mockTasksService.countDocuments.mockResolvedValue(mockTotal);
+
+      const result = await tasksService.getAllTasks(queryDto);
+
+      expect(result).toEqual({
+        tasks: mockTasks,
+        total: mockTotal,
+      });
+
+      expect(mockTasksService.find).toHaveBeenCalledWith({
+        $or: [
+          { title: { $regex: 'test', $options: 'i' } },
+          { description: { $regex: 'test', $options: 'i' } },
+        ],
+        status: TaskStatus.PENDING,
+      });
     });
-    expect(result.id).toBeDefined();
-  });
 
-  it('3. should get all tasks and find the created task', async () => {
-    const result = await service.getAllTasks({});
+    it('should return tasks without search and status filters', async () => {
+      const queryDto: QueryTasksDto = {
+        page: '1',
+        limit: '10',
+      };
 
-    expect(result.tasks.length).toBe(1);
-    expect(result.total).toBe(1);
-    expect(result.tasks[0]).toMatchObject({
-      title: mockTaskDto.title,
-      description: mockTaskDto.description,
+      const mockTasks = [mockTask];
+      const mockTotal = 1;
+
+      mockTasksService.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          skip: jest.fn().mockReturnValue({
+            limit: jest.fn().mockReturnValue({
+              exec: jest.fn().mockResolvedValue(mockTasks),
+            }),
+          }),
+        }),
+      });
+
+      mockTasksService.countDocuments.mockResolvedValue(mockTotal);
+
+      const result = await tasksService.getAllTasks(queryDto);
+
+      expect(result).toEqual({
+        tasks: mockTasks,
+        total: mockTotal,
+      });
+
+      expect(mockTasksService.find).toHaveBeenCalledWith({});
     });
   });
 
-  it('4. should get the task by id', async () => {
-    const result = await service.getTaskById(createdTaskId);
+  describe('getTaskById', () => {
+    it('should find and return a task by ID', async () => {
+      mockTasksService.findById.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockTask),
+      });
 
-    expect(result).toMatchObject({
-      title: mockTaskDto.title,
-      description: mockTaskDto.description,
+      const result = await tasksService.getTaskById(mockTask.id);
+
+      expect(mockTasksService.findById).toHaveBeenCalledWith(mockTask.id);
+      expect(result).toEqual(mockTask);
+    });
+
+    it('should throw NotFoundException if task is not found', async () => {
+      mockTasksService.findById.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null),
+      });
+
+      await expect(tasksService.getTaskById(mockTask.id)).rejects.toThrow(
+        NotFoundException,
+      );
+
+      expect(mockTasksService.findById).toHaveBeenCalledWith(mockTask.id);
     });
   });
 
-  it('5. should update the task', async () => {
-    const updateDto = { title: 'test done' };
-    const result = await service.updateTask(createdTaskId, updateDto);
+  describe('updateTask', () => {
+    it('should update and return a task', async () => {
+      const updateTaskDto: UpdateTaskDto = {
+        title: 'Updated Task',
+        status: TaskStatus.IN_PROGRESS,
+      };
 
-    expect(result).toMatchObject({
-      title: 'test done',
-      description: mockTaskDto.description,
+      const updatedTask = { ...mockTask, ...updateTaskDto };
+
+      mockTasksService.findByIdAndUpdate.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(updatedTask),
+      });
+
+      const result = await tasksService.updateTask(mockTask.id, updateTaskDto);
+
+      expect(mockTasksService.findByIdAndUpdate).toHaveBeenCalledWith(
+        mockTask.id,
+        updateTaskDto,
+      );
+      expect(result).toEqual(updatedTask);
+    });
+
+    it('should throw NotFoundException if task to update is not found', async () => {
+      mockTasksService.findByIdAndUpdate.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null),
+      });
+
+      await expect(
+        tasksService.updateTask(mockTask.id, {
+          status: TaskStatus.COMPLETED,
+        }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
-  it('6. should delete the task', async () => {
-    const result = await service.deleteTask(createdTaskId);
-    expect(result).toBeUndefined();
+  describe('deleteTask', () => {
+    it('should delete and return task id', async () => {
+      mockTasksService.findByIdAndDelete.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockTask),
+      });
 
-    // Verify the task is deleted by trying to fetch it
-    const allTasks = await service.getAllTasks({});
-    expect(allTasks.total).toBe(0);
-    expect(allTasks.tasks.length).toBe(0);
+      const result = await tasksService.deleteTask(mockTask.id);
+
+      expect(mockTasksService.findByIdAndDelete).toHaveBeenCalledWith(
+        mockTask.id,
+      );
+      expect(result).toEqual(mockTask.id);
+    });
+
+    it('should throw NotFoundException if task to delete is not found', async () => {
+      mockTasksService.findByIdAndDelete.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null),
+      });
+
+      await expect(tasksService.deleteTask(mockTask.id)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
   });
 });

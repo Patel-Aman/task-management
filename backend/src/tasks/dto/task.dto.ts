@@ -28,13 +28,14 @@ export class CreateTaskDto {
   })
   @IsEnum(TaskStatus)
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value)) // Ignore empty status
   status?: TaskStatus;
 }
 
 export class UpdateTaskDto {
   @IsOptional()
   @IsString()
-  title: string;
+  title?: string;
 
   @IsString()
   @IsOptional()
@@ -42,6 +43,7 @@ export class UpdateTaskDto {
 
   @IsEnum(TaskStatus)
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value)) // Ignore empty status
   status?: TaskStatus;
 }
 
