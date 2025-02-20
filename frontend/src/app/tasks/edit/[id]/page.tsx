@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { TaskForm } from '@/components/TaskForm';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
-import { fetchTaskById, fetchTasks } from '@/lib/features/task/taskSlice';
+import { fetchTaskById } from '@/lib/features/task/taskSlice';
 import { useParams } from 'next/navigation';
 
 export default function EditTaskPage() {

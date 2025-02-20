@@ -58,7 +58,7 @@ export function TaskForm({ task, isEditing = false }: TaskFormProps) {
     setIsSubmitting(true);
     try {
       if (isEditing && task) {
-        await dispatch(updateTask({ _id: task._id, task: data }));
+        await dispatch(updateTask({ id: task.id, task: data }));
       } else {
         await dispatch(createTask(data));
       }

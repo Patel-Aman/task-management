@@ -12,12 +12,15 @@ import {
 } from './ui/select';
 import { Button } from './ui/button';
 import { Edit2, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 export const TaskCard = ({ task }: { task: Task }) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const [status, setStatus] = useState(task.status);
 
   const handleStatusChange = async (newStatus: string) => {
+    setStatus(newStatus as Task['status']);
     await dispatch(
       updateTask({
         id: task.id,
@@ -43,7 +46,7 @@ export const TaskCard = ({ task }: { task: Task }) => {
           <h3 className="text-lg font-semibold">{task.title}</h3>
         </div>
         <div className="flex items-center gap-4">
-          <Select value={task.status} onValueChange={handleStatusChange}>
+          <Select value={status} onValueChange={handleStatusChange}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>

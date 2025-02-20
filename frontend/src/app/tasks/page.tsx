@@ -6,12 +6,20 @@ import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { Task } from '@/types/task';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Filter, Plus, Search } from 'lucide-react';
 import { TaskCard } from '@/components/TaskCard';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/lib/hooks/useDebounce';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const ITEMS_PER_PAGE = 10;
+const STATUS_OPTIONS = ['All', 'pending', 'in-progress', 'completed'];
 
 const getPageNumbers = (currentPage: number, totalPages: number) => {
   const pageNumbers = [];
@@ -63,15 +71,23 @@ export default function TasksPage() {
   const currentPage = parseInt(searchParams.get('page') || '1');
   const [searchQuery, setSearchQuery] = useState('');
   const [goToPage, setGoToPage] = useState('');
+  const [statusFilter, setStatusFilter] = useState(
+    searchParams.get('status') || ''
+  );
 
-  // Update URL with both page and search parameters
-  const updateURL = (page: number, search: string) => {
+  // Update URL with page, status and search parameters
+  const updateURL = (page: number, search: string, status: string) => {
     const params = new URLSearchParams(searchParams);
     params.set('page', page.toString());
     if (search) {
       params.set('search', search);
     } else {
       params.delete('search');
+    }
+    if (status && status !== 'All') {
+      params.set('status', status);
+    } else {
+      params.delete('status');
     }
     router.push(`${pathname}?${params.toString()}`);
   };
@@ -81,12 +97,17 @@ export default function TasksPage() {
 
   // Handle page change
   const handlePageChange = (page: number) => {
-    updateURL(page, debouncedSearch);
+    updateURL(page, debouncedSearch, statusFilter);
   };
 
   // Handle search change
   const handleSearchChange = (search: string) => {
     setSearchQuery(search);
+  };
+
+  const handleStatusChange = (status: string) => {
+    setStatusFilter(status);
+    updateURL(1, debouncedSearch, status);
   };
 
   // Handle direct page navigation
@@ -104,15 +125,16 @@ export default function TasksPage() {
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         search: debouncedSearch,
+        status: statusFilter,
       })
     );
-  }, [dispatch, currentPage, debouncedSearch]);
+  }, [dispatch, currentPage, debouncedSearch, statusFilter]);
 
   // Update URL when debounced search changes
   useEffect(() => {
     const currentSearch = searchParams.get('search') || '';
     if (debouncedSearch !== currentSearch) {
-      updateURL(1, debouncedSearch); // Only reset to page 1 for new searches
+      updateURL(1, debouncedSearch, statusFilter); // Only reset to page 1 for new searches
     }
   }, [debouncedSearch]);
 
@@ -132,15 +154,37 @@ export default function TasksPage() {
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-        <Input
-          type="text"
-          placeholder="Search tasks by title or description..."
-          value={searchQuery}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          className="pl-10"
-        />
+      <div className="flex items-center justify-center gap-6 p-4 bg-gray-50 rounded-lg shadow-sm">
+        {/* Search Input with Icon */}
+        <div className="relative flex-grow max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Input
+            type="text"
+            placeholder="Search tasks by title or description..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="pl-10 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Filter Dropdown */}
+        <Select value={statusFilter} onValueChange={handleStatusChange}>
+          <SelectTrigger className="w-48 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+            <Filter className="w-4 h-4 mr-2 text-gray-400" />
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent className="rounded-lg shadow-lg">
+            {STATUS_OPTIONS.map((status) => (
+              <SelectItem
+                key={status}
+                value={status}
+                className="hover:bg-gray-100"
+              >
+                {status}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Tasks Grid */}

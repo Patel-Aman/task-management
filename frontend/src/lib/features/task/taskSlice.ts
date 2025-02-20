@@ -8,6 +8,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 export const fetchTasks = createAsyncThunk(
   'tasks/fetchTasks',
   async ({ page = 1, limit = 10, search = '', status = '' }: Query) => {
+    if (status === 'All') status = '';
     const response = await axios.get(
       `${API_URL}/tasks?page=${page}&limit=${limit}&search=${search}&status=${status}`
     );
