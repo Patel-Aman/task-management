@@ -59,8 +59,8 @@ A full-stack task management application with a RESTful API built using NestJS a
 ### Clone the repository
 
 ```bash
-git clone https://github.com/Patel-Aman/task-manager.git
-cd task-manager
+git clone https://github.com/Patel-Aman/task-management.git
+cd task-management
 ```
 
 ### Backend Setup
@@ -80,7 +80,7 @@ cd task-manager
 3. **Create a `.env` file**
 
    ```env
-   MONGODB_URI=mongodb://localhost:27017/task-manager
+   MONGODB_URI=mongodb://localhost:27017/task-management
    PORT=5000
    ```
 
